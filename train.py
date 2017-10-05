@@ -2,6 +2,7 @@ from __future__ import division
 
 import os
 import argparse
+import time
 import torch
 import torch.nn as nn
 from torch import cuda
@@ -160,7 +161,8 @@ def train_model(model, train_data, valid_data, fields, optim):
 
         # 5. Drop a checkpoint if needed.
         if epoch >= opt.start_checkpoint_at:
-            trainer.drop_checkpoint(opt, epoch, fields, valid_stats)
+            trainer.drop_checkpoint(opt, epoch, fields, valid_stats,
+                                    opt.save_model + 'ep{0}'.format(epoch))
 
 
 def check_save_model_path():

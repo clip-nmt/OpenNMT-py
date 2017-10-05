@@ -100,6 +100,11 @@ def train_opts(parser):
     parser.add_argument('-data', required=True,
                         help="""Path prefix to the ".train.pt" and
                         ".valid.pt" file path from preprocess.py""")
+    parser.add_argument('-valid_src_raw', required=True,
+                        help="Source validation file")
+    parser.add_argument('-valid_tgt_raw', required=True,
+                        help="Target validation file")
+    parser.add_argument('-opennmt_path', required=True)
 
     parser.add_argument('-save_model', default='model',
                         help="""Model filename (the model will be saved as
