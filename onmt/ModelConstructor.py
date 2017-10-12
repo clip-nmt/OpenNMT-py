@@ -140,6 +140,11 @@ def make_base_model(model_opt, fields, gpu, checkpoint=None):
     feature_dicts = []
     tgt_embeddings = make_embeddings(model_opt, tgt_dict,
                                      feature_dicts, for_encoder=False)
+
+    # Share the embedding matrix - preprocess with share_vocab required
+    if model_opt.share_embeddings:
+        tgt_embeddings.word_lut.weight = src_embeddings.word_lut.weight
+
     decoder = make_decoder(model_opt, tgt_embeddings)
 
     # Make NMTModel(= encoder + decoder).
@@ -163,15 +168,17 @@ def make_base_model(model_opt, fields, gpu, checkpoint=None):
         generator.load_state_dict(checkpoint['generator'])
     else:
         if model_opt.param_init != 0.0:
-            print('Intializing parameters.')
+            print('Intializing model parameters.')
             for p in model.parameters():
+                p.data.uniform_(-model_opt.param_init, model_opt.param_init)
+            for p in generator.parameters():
                 p.data.uniform_(-model_opt.param_init, model_opt.param_init)
         model.encoder.embeddings.load_pretrained_vectors(
                 model_opt.pre_word_vecs_enc, model_opt.fix_word_vecs_enc)
         model.decoder.embeddings.load_pretrained_vectors(
                 model_opt.pre_word_vecs_dec, model_opt.fix_word_vecs_dec)
 
-    # add the generator to the module (does this register the parameter?)
+    # Add generator to model (this registers it as parameter of model).
     model.generator = generator
 
     # Make the whole model leverage GPU if indicated to do so.
